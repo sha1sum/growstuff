@@ -94,6 +94,21 @@ class Planting < ActiveRecord::Base
     return photos.present?
   end
 
+  def calculate_days_before_maturity(planting, crop)
+    p_crop = Planting.where(:crop_id => crop).where.not(:id => planting)
+    differences = p_crop.collect do |p|
+      if p.finished and !p.finished_at.nil?
+        (p.finished_at - p.planted_at).to_i
+      end
+    end
+
+    if differences.compact.empty?
+      nil
+    else  
+      differences.compact.sum/differences.compact.length
+    end
+  end
+
   # return a list of interesting plantings, for the homepage etc.
   # we can't do this via a scope (as far as we know) so sadly we have to
   # do it this way.
@@ -102,7 +117,7 @@ class Planting < ActiveRecord::Base
     seen_owners = Hash.new(false) # keep track of which owners we've seen already
 
     Planting.all.each do |p|
-      break if interesting_plantings.count == howmany # got enough yet?
+      break if interesting_plantings.size == howmany # got enough yet?
       if require_photo
         next unless p.photos.present? # skip those without photos, if required
       end

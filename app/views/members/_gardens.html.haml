@@ -19,7 +19,7 @@
           :growstuff_markdown
             #{ strip_tags g.description }
 
-          - if g.photos.count > 0 or (can? :edit, g and can? :create, Photo)
+          - if g.photos.size > 0 or (can? :edit, g and can? :create, Photo)
             .row
               %h2 Photos
 
@@ -34,8 +34,11 @@
                         = link_to "Add photo", new_photo_path(:type => "garden", :id => g.id), :class => 'btn btn-primary'
 
         %h3 What's planted here?
-        - g.featured_plantings.each do |p|
-          = render :partial => "plantings/thumbnail", :locals => { :planting => p, :hide_description => true }
+        .row
+          - if g.featured_plantings.size > 0
+            - g.featured_plantings.each.with_index do |planting|
+              .col-xs-12.col-lg-6
+                = render partial: "plantings/thumbnail", locals: {:planting => planting}
 
         %p
           = link_to "More about this garden...", url_for(g)
